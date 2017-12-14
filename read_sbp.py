@@ -29,6 +29,8 @@ def read_piksi(port='/dev/ttyUSB0', baud=115200):
             except KeyboardInterrupt:
                 pass
 
+    return
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
