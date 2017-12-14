@@ -1,14 +1,17 @@
 from sbp.client.drivers.pyserial_driver import PySerialDriver
 from sbp.client import Handler, Framer
-from sbp.client.loggers.json_logger import JSONLogger
-from sbp.navigation import SBP_MSG_BASELINE_NED, MsgBaselineNED
+from sbp.navigation import SBP_MSG_BASELINE_NED, SBP_MSG_POS_LLH, \
+    SBP_MSG_VEL_NED
 
 import argparse
+import pdb
 
 
-def read_piksi(port='/dev/ttyUSB0', baud=115200):
+def read_rtk(port='/dev/ttyUSB0', baud=115200):
     '''
-    Reads the output from SwiftNav Piksi, parses the messege and prints.abs
+    Reads the RTK output from SwiftNav Piksi, parses the messege and prints.
+    Piksi's must be configured to give RTK message through the serial port.
+    NOTE: Current official sbp drivers only support python-2
 
     Args:
         port: serial port [[default='/dev/ttyUSB0']
@@ -22,10 +25,15 @@ def read_piksi(port='/dev/ttyUSB0', baud=115200):
     with PySerialDriver(port, baud) as driver:
         with Handler(Framer(driver.read, None, verbose=True)) as source:
             try:
-                for msg, metadata in source.filter(SBP_MSG_BASELINE_NED):
-                    # print out the N, E, D coordinates of the baseline
-                    print "%.4f,%.4f,%.4f" % (msg.n * 1e-3, msg.e * 1e-3,
-                                              msg.d * 1e-3)
+                msg_list = [SBP_MSG_BASELINE_NED, SBP_MSG_POS_LLH,
+                            SBP_MSG_VEL_NED]
+                for msg, metadata in source.filter(msg_list):
+                    print(msg.msg_type)
+                    # pdb.set_trace()
+
+                    # print "%.4f,%.4f,%.4f" % (msg.n * 1e-3, msg.e * 1e-3,
+                    #                           msg.d * 1e-3)
+
             except KeyboardInterrupt:
                 pass
 
@@ -49,4 +57,4 @@ if __name__ == "__main__":
         help='specify the baud rate [default = 115200]')
     args = parser.parse_args()
 
-    read_piksi(args.port[0], args.baud[0])
+    read_rtk(args.port[0], args.baud[0])
