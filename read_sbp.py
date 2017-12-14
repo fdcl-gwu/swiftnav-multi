@@ -7,6 +7,24 @@ import argparse
 import pdb
 
 
+class RtkMessage:
+    '''
+    Saves and outputs parsed RTK data from Piks
+    '''
+
+    def __init__(self):
+        self.flag = 0.0
+        self.n = 0.0
+        self.e = 0.0
+        self.d = 0.0
+        self.lat = 0.0
+        self.lon = 0.0
+        self.h = 0.0
+        self.v_n = 0.0
+        self.v_e = 0.0
+        self.v_d = 0.0
+
+
 def read_rtk(port='/dev/ttyUSB0', baud=115200):
     '''
     Reads the RTK output from SwiftNav Piksi, parses the messege and prints.
@@ -21,6 +39,8 @@ def read_rtk(port='/dev/ttyUSB0', baud=115200):
         None
     '''
 
+    m = RtkMessage()
+
     # open a connection to Piksi
     with PySerialDriver(port, baud) as driver:
         with Handler(Framer(driver.read, None, verbose=True)) as source:
@@ -28,11 +48,31 @@ def read_rtk(port='/dev/ttyUSB0', baud=115200):
                 msg_list = [SBP_MSG_BASELINE_NED, SBP_MSG_POS_LLH,
                             SBP_MSG_VEL_NED]
                 for msg, metadata in source.filter(msg_list):
-                    print(msg.msg_type)
-                    # pdb.set_trace()
 
-                    # print "%.4f,%.4f,%.4f" % (msg.n * 1e-3, msg.e * 1e-3,
-                    #                           msg.d * 1e-3)
+                    # LLH position in deg-deg-m
+                    if msg.msg_type == 522:
+                        m.lat = msg.lat
+                        m.lon = msg.lon
+                        m.h = msg.height
+
+                    # RTK position in mm (from base to rover)
+                    elif msg.msg_type == 524:
+                        m.n = msg.n
+                        m.e = msg.e
+                        m.d = msg.d
+                        m.flag = msg.flags
+
+                    # RTK velocity in mm/s
+                    elif msg.msg_type == 526:
+                        m.v_n = msg.n
+                        m.v_e = msg.e
+                        m.v_d = msg.d
+
+                    else:
+                        pass
+
+                    print "%.4f,%.4f,%.4f" % (m.n * 1e-3, m.e * 1e-3,
+                                             m.d * 1e-3)
 
             except KeyboardInterrupt:
                 pass
