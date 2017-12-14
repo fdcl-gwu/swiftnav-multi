@@ -31,11 +31,10 @@ class RtkMessage:
         Returns all the data as a string
         '''
 
-        return('%.0f\t%.2f\t%2.8f\t%2.8f\t%4.4f\t%4.4f\t%4.4f\t%4.4f\t'
-               '%4.4f\t%4.4f\t%4.4f\t%.0f\t' %
+        return('%.0f\t%.0f\t%2.8f\t%2.8f\t%4.6f\t%6.0f\t%6.0f\t%6.0f\t'
+               '%6.0f\t%6.0f\t%6.0f\t%.0f\t' %
                (self.wn, self.tow, self.lat, self.lon, self.h, self.n, self.e,
                 self.d, self.v_n, self.v_e, self.v_d, self.flag))
-
 
 
 def read_rtk(port='/dev/ttyUSB0', baud=115200):
