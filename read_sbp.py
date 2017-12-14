@@ -1,7 +1,7 @@
 from sbp.client.drivers.pyserial_driver import PySerialDriver
 from sbp.client import Handler, Framer
 from sbp.navigation import SBP_MSG_BASELINE_NED, SBP_MSG_POS_LLH, \
-    SBP_MSG_VEL_NED
+    SBP_MSG_VEL_NED, SBP_MSG_GPS_TIME
 
 import argparse
 import pdb
@@ -23,6 +23,19 @@ class RtkMessage:
         self.v_n = 0.0
         self.v_e = 0.0
         self.v_d = 0.0
+        self.wn = 0
+        self.tow = 0
+
+    def whole_string(self):
+        '''
+        Returns all the data as a string
+        '''
+
+        return('%.0f\t%.2f\t%2.8f\t%2.8f\t%4.4f\t%4.4f\t%4.4f\t%4.4f\t'
+               '%4.4f\t%4.4f\t%4.4f\t%.0f\t' %
+               (self.wn, self.tow, self.lat, self.lon, self.h, self.n, self.e,
+                self.d, self.v_n, self.v_e, self.v_d, self.flag))
+
 
 
 def read_rtk(port='/dev/ttyUSB0', baud=115200):
@@ -46,7 +59,7 @@ def read_rtk(port='/dev/ttyUSB0', baud=115200):
         with Handler(Framer(driver.read, None, verbose=True)) as source:
             try:
                 msg_list = [SBP_MSG_BASELINE_NED, SBP_MSG_POS_LLH,
-                            SBP_MSG_VEL_NED]
+                            SBP_MSG_VEL_NED, SBP_MSG_GPS_TIME]
                 for msg, metadata in source.filter(msg_list):
 
                     # LLH position in deg-deg-m
@@ -68,11 +81,15 @@ def read_rtk(port='/dev/ttyUSB0', baud=115200):
                         m.v_e = msg.e
                         m.v_d = msg.d
 
+                    # GPS time
+                    elif msg.msg_type == 258:
+                        m.wn = msg.wn
+                        m.tow = msg.tow  # in millis
+
                     else:
                         pass
 
-                    print "%.4f,%.4f,%.4f" % (m.n * 1e-3, m.e * 1e-3,
-                                             m.d * 1e-3)
+                    print m.whole_string()
 
             except KeyboardInterrupt:
                 pass
