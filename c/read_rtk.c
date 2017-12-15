@@ -15,6 +15,7 @@ static sbp_msg_callbacks_node_t heartbeat_callback_node;
 
 
 void usage(char *prog_name) {
+  /* Help string for -h argument */
   fprintf(stderr, "usage: %s [-p path/to/serial/port][-b baud_rate]\n"
           "default values:\n"
           "\t-p = /dev/ttyUSB0\n"
@@ -24,10 +25,13 @@ void usage(char *prog_name) {
 
 void setup_port(int baud)
 {
-  int result;
+  /* set the serial port options for the Piksi */
 
   printf("Attempting to configure the serial port...\n");
 
+  int result;
+
+  // set baud rate
   result = sp_set_baudrate(piksi_port, baud);
   if (result != SP_OK) {
     fprintf(stderr, "Cannot set port baud rate!\n");
@@ -35,6 +39,7 @@ void setup_port(int baud)
   }
   printf("Configured the baud rate...\n");
 
+  // set flow control
   result = sp_set_flowcontrol(piksi_port, SP_FLOWCONTROL_NONE);
   if (result != SP_OK) {
     fprintf(stderr, "Cannot set flow control!\n");
@@ -42,6 +47,7 @@ void setup_port(int baud)
   }
   printf("Configured the flow control...\n");
 
+  // set bit size
   result = sp_set_bits(piksi_port, 8);
   if (result != SP_OK) {
     fprintf(stderr, "Cannot set data bits!\n");
@@ -49,21 +55,22 @@ void setup_port(int baud)
   }
   printf("Configured the number of data bits...\n");
 
+  // set parity
   result = sp_set_parity(piksi_port, SP_PARITY_NONE);
   if (result != SP_OK) {
     fprintf(stderr, "Cannot set parity!\n");
     exit(EXIT_FAILURE);
   }
-
   printf("Configured the parity...\n");
 
+  // set stop bits
   result = sp_set_stopbits(piksi_port, 1);
   if (result != SP_OK) {
     fprintf(stderr, "Cannot set stop bits!\n");
     exit(EXIT_FAILURE);
   }
-
   printf("Configured the number of stop bits... done.\n");
+
 }
 
 
@@ -93,12 +100,6 @@ int main(int argc, char **argv)
   sbp_state_t s;
 
   // parse the args
-  if (argc == 1) {
-    usage(argv[0]);
-    exit(EXIT_FAILURE);
-  }
-
-
   serial_port_name = "/dev/ttyUSB0";
   unsigned int baud = 115200;
   while ((opt = getopt(argc, argv, "pb:h")) != -1) {
@@ -123,28 +124,30 @@ int main(int argc, char **argv)
   printf("Attempting to open %s with baud rate %i ...\n", serial_port_name,
     baud);
 
+  // check for serial port
   if (!serial_port_name) {
-    fprintf(stderr, "Please supply the serial port path where the Piksi is " \
-                    "connected!\n");
+    fprintf(stderr, "Check the serial port path of the Piksi!\n");
     exit(EXIT_FAILURE);
   }
 
+  // check if Piksi can be detected
   result = sp_get_port_by_name(serial_port_name, &piksi_port);
   if (result != SP_OK) {
     fprintf(stderr, "Cannot find provided serial port!\n");
     exit(EXIT_FAILURE);
   }
 
+  // open Piksi for readings
   result = sp_open(piksi_port, SP_MODE_READ);
   if (result != SP_OK) {
     fprintf(stderr, "Cannot open %s for reading!\n", serial_port_name);
     exit(EXIT_FAILURE);
   }
 
+  // set baud rate
   setup_port(baud);
 
   sbp_state_init(&s);
-
   sbp_register_callback(&s, SBP_MSG_HEARTBEAT, &heartbeat_callback, NULL,
                         &heartbeat_callback_node);
 
@@ -156,9 +159,12 @@ int main(int argc, char **argv)
   if (result != SP_OK) {
     fprintf(stderr, "Cannot close %s properly!\n", serial_port_name);
   }
+  else {
+    printf("Serial at %s port closed.", serial_port_name);
+  }
 
+  // clean exit the serial ports
   sp_free_port(piksi_port);
-
   free(serial_port_name);
 
   return 0;
