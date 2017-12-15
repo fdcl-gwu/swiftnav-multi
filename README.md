@@ -26,8 +26,8 @@
     sudo make install
     ```
 
-## Dependencies
-### [lib-serial](https://sigrok.org/wiki/Libserialport)
+### Dependencies
+#### Serial Port Library - [lib-serial](https://sigrok.org/wiki/Libserialport)
 1. Clone the [repo](https://sigrok.org/wiki/Libserialport)
     ```
     git clone https://sigrok.org/wiki/Libserialport
@@ -38,6 +38,27 @@
     ./configure
     make
     sudo make install
+    ```
+
+#### On 64-bit Systems
+
+  ```
+  sudo apt-get install libgtk2.0-0:i386 libidn11:i386 libglu1-mesa:i386
+  sudo apt-get install libpangox-1.0-0:i386 libpangoxft-1.0-0:i386
+  ```
+
+### Running the code
+1. Compiling
+    ```
+    mkdir build
+    cd build
+    cmake ../
+    make
+    ```
+
+2. Running
+    ```
+    ./read_rtk -p /dev/ttyUSB0
     ```
 
 ## Python
