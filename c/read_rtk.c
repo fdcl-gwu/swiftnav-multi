@@ -15,7 +15,10 @@ static sbp_msg_callbacks_node_t heartbeat_callback_node;
 
 
 void usage(char *prog_name) {
-  fprintf(stderr, "usage: %s [-p serial port]\n", prog_name);
+  fprintf(stderr, "usage: %s [-p path/to/serial/port][-b baud_rate]\n"
+          "default values:\n"
+          "\t-p = /dev/ttyUSB0\n"
+          "\t-b = 115200\n", prog_name);
 }
 
 
@@ -92,8 +95,7 @@ int main(int argc, char **argv)
   // parse the args
   serial_port_name = "/dev/ttyUSB0";
   unsigned int baud = 115200;
-
-  while ((opt = getopt(argc, argv, "pb:")) != -1) {
+  while ((opt = getopt(argc, argv, "pbh:")) != -1) {
     switch (opt) {
       case 'p':
         serial_port_name = (char *)calloc(strlen(optarg) + 1, sizeof(char));
@@ -105,7 +107,6 @@ int main(int argc, char **argv)
         break;
       case 'b':
         baud = atoi(optarg);
-
         break;
       case 'h':
         usage(argv[0]);
