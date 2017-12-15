@@ -2,7 +2,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 #include <unistd.h>
+
 
 #include <libserialport.h>
 
@@ -191,9 +193,13 @@ int main(int argc, char **argv)
   sbp_register_callback(&s, SBP_MSG_GPS_TIME, &gps_time_callback, NULL,
                         &gps_time_node);
 
+  struct timeval stop, start;
 
   while(1) {
+    // gettimeofday(&start, NULL);
     sbp_process(&s, &piksi_port_read);
+    // gettimeofday(&stop, NULL);
+    // printf("took %lu\n", stop.tv_usec - start.tv_usec);
   }
 
   result = sp_close(piksi_port);
