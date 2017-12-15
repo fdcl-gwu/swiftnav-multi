@@ -735,15 +735,6 @@ GitHub.sublime-settings
 
 # expex forward references with \gathertags
 
-### Text ###
-*.doc
-*.docx
-*.msg
-*.pages
-*.rtf
-*.txt
-*.wpd
-*.wps
 
 ### Vim ###
 # swap
