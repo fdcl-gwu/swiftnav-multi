@@ -93,9 +93,15 @@ int main(int argc, char **argv)
   sbp_state_t s;
 
   // parse the args
+  if (argc == 1) {
+    usage(argv[0]);
+    exit(EXIT_FAILURE);
+  }
+
+
   serial_port_name = "/dev/ttyUSB0";
   unsigned int baud = 115200;
-  while ((opt = getopt(argc, argv, "pbh:")) != -1) {
+  while ((opt = getopt(argc, argv, "pb:h")) != -1) {
     switch (opt) {
       case 'p':
         serial_port_name = (char *)calloc(strlen(optarg) + 1, sizeof(char));
