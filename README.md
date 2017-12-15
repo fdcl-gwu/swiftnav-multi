@@ -26,6 +26,20 @@
     sudo make install
     ```
 
+## Dependencies
+### [lib-serial](https://sigrok.org/wiki/Libserialport)
+1. Clone the [repo](https://sigrok.org/wiki/Libserialport)
+    ```
+    git clone https://sigrok.org/wiki/Libserialport
+    ```
+2. Build the library
+    ```
+    ./autogen.sh
+    ./configure
+    make
+    sudo make install
+    ```
+
 ## Python
 ### Environment setup
 1. Install Anaconda
