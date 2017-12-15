@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -85,17 +86,14 @@ int main(int argc, char **argv)
 {
   int opt;
   int result = 0;
-  int baud;
 
   sbp_state_t s;
 
   // parse the args
-  if (argc <= 1) {
-    serial_port_name = "/dev/ttyUSB0";
-    baud = 115200;
-  }
+  serial_port_name = "/dev/ttyUSB0";
+  unsigned int baud = 115200;
 
-  while ((opt = getopt(argc, argv, "p:")) != -1) {
+  while ((opt = getopt(argc, argv, "pb:")) != -1) {
     switch (opt) {
       case 'p':
         serial_port_name = (char *)calloc(strlen(optarg) + 1, sizeof(char));
@@ -105,11 +103,18 @@ int main(int argc, char **argv)
         }
         strcpy(serial_port_name, optarg);
         break;
+      case 'b':
+        baud = atoi(optarg);
+
+        break;
       case 'h':
         usage(argv[0]);
         exit(EXIT_FAILURE);
     }
   }
+
+  printf("Attempting to open %s with baud rate %i ...\n", serial_port_name,
+    baud);
 
   if (!serial_port_name) {
     fprintf(stderr, "Please supply the serial port path where the Piksi is " \
@@ -122,8 +127,6 @@ int main(int argc, char **argv)
     fprintf(stderr, "Cannot find provided serial port!\n");
     exit(EXIT_FAILURE);
   }
-
-  printf("Attempting to open the serial port...\n");
 
   result = sp_open(piksi_port, SP_MODE_READ);
   if (result != SP_OK) {
