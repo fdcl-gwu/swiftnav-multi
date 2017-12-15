@@ -12,17 +12,19 @@ char *serial_port_name = NULL;
 struct sp_port *piksi_port = NULL;
 static sbp_msg_callbacks_node_t heartbeat_callback_node;
 
+
 void usage(char *prog_name) {
   fprintf(stderr, "usage: %s [-p serial port]\n", prog_name);
 }
 
-void setup_port()
+
+void setup_port(int baud)
 {
   int result;
 
   printf("Attempting to configure the serial port...\n");
 
-  result = sp_set_baudrate(piksi_port, 115200);
+  result = sp_set_baudrate(piksi_port, baud);
   if (result != SP_OK) {
     fprintf(stderr, "Cannot set port baud rate!\n");
     exit(EXIT_FAILURE);
@@ -60,11 +62,13 @@ void setup_port()
   printf("Configured the number of stop bits... done.\n");
 }
 
+
 void heartbeat_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
   fprintf(stdout, "%s\n", __FUNCTION__);
 }
+
 
 u32 piksi_port_read(u8 *buff, u32 n, void *context)
 {
@@ -76,16 +80,19 @@ u32 piksi_port_read(u8 *buff, u32 n, void *context)
   return result;
 }
 
+
 int main(int argc, char **argv)
 {
   int opt;
   int result = 0;
+  int baud;
 
   sbp_state_t s;
 
+  // parse the args
   if (argc <= 1) {
-    usage(argv[0]);
-    exit(EXIT_FAILURE);
+    serial_port_name = "/dev/ttyUSB0";
+    baud = 115200;
   }
 
   while ((opt = getopt(argc, argv, "p:")) != -1) {
@@ -124,7 +131,7 @@ int main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
-  setup_port();
+  setup_port(baud);
 
   sbp_state_init(&s);
 
