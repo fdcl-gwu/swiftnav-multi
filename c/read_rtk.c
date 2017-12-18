@@ -14,11 +14,14 @@
 
 char *serial_port_name = NULL;
 struct sp_port *piksi_port = NULL;
-static sbp_msg_callbacks_node_t heartbeat_node;
-static sbp_msg_callbacks_node_t baseline_node;
+
+static sbp_msg_callbacks_node_t gps_time_node;
 static sbp_msg_callbacks_node_t pos_llh_node;
 static sbp_msg_callbacks_node_t vel_ned_node;
-static sbp_msg_callbacks_node_t gps_time_node;
+static sbp_msg_callbacks_node_t baseline_node;
+static sbp_msg_callbacks_node_t heartbeat_node;
+
+static sbp_msg_callbacks_node_t heartbeat_node_0;
 
 struct piksi_msg {
   int utc;
@@ -31,9 +34,10 @@ struct piksi_msg {
   u8 flag;
 };
 
-struct timeval stop, start;
-
 struct piksi_msg piksi;
+
+struct timeval stop, start;
+bool flag_start = 0;
 
 void usage(char *prog_name) {
   /* Help string for -h argument */
@@ -44,18 +48,24 @@ void usage(char *prog_name) {
 }
 
 
+void heartbeat_callback_0(u16 sender_id, u8 len, u8 msg[], void *context)
+{
+  (void)sender_id, (void)len, (void)msg, (void)context;
+  fprintf(stdout, "First heartbeat detected.\n\n");
+  flag_start = 1;
+}
+
 void heartbeat_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
   fprintf(stdout, "%s\n", __FUNCTION__);
-  printf("took %f\n", (stop.tv_usec - start.tv_usec) / 1e3);
 }
 
 
 void baseline_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  // fprintf(stdout, "%s\n", __FUNCTION__);
+  fprintf(stdout, "%s\n", __FUNCTION__);
 
   msg_baseline_ned_t baseline = *(msg_baseline_ned_t *)msg;
   piksi.n = baseline.n;
@@ -63,13 +73,16 @@ void baseline_callback(u16 sender_id, u8 len, u8 msg[], void *context)
   piksi.d = baseline.d;
   piksi.flag = baseline.flags;
   piksi.sats = baseline.n_sats;
+
+  // gettimeofday(&stop, NULL);
+  // printf("took %f\n", (stop.tv_usec - start.tv_usec) / 1e3);
 }
 
 
 void pos_llh_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  // fprintf(stdout, "%s\n", __FUNCTION__);
+  fprintf(stdout, "%s\n", __FUNCTION__);
 
   msg_pos_llh_t pos_llh = *(msg_pos_llh_t *)msg;
   piksi.lat = pos_llh.lat;
@@ -81,18 +94,20 @@ void pos_llh_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 void vel_ned_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  // fprintf(stdout, "%s\n", __FUNCTION__);
+  fprintf(stdout, "%s\n", __FUNCTION__);
 
   msg_vel_ned_t vel_ned = *(msg_vel_ned_t *)msg;
   piksi.v_n = vel_ned.n;
   piksi.v_e = vel_ned.e;
   piksi.v_d = vel_ned.d;
+
 }
 
 void gps_time_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  // fprintf(stdout, "%s\n", __FUNCTION__);
+  fprintf(stdout, "%s\n", __FUNCTION__);
+  // gettimeofday(&start, NULL);
 
   msg_gps_time_t gps_time = *(msg_gps_time_t *)msg;
   piksi.wn = gps_time.wn;
@@ -103,7 +118,6 @@ void gps_time_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 void setup_port(int baud)
 {
   /* set the serial port options for the Piksi */
-
   printf("Attempting to configure the serial port...\n");
 
   int result;
@@ -168,6 +182,7 @@ int main(int argc, char **argv)
   int result = 0;
 
   sbp_state_t s;
+  sbp_state_t s0;
 
   piksi.utc = 100;
   printf("%i\n", piksi.utc);
@@ -220,29 +235,44 @@ int main(int argc, char **argv)
   // set baud rate
   setup_port(baud);
 
+  sbp_state_init(&s0);
+  sbp_register_callback(&s0, SBP_MSG_HEARTBEAT, &heartbeat_callback_0, NULL,
+                        &heartbeat_node_0); // 65535
+
   sbp_state_init(&s);
-  sbp_register_callback(&s, SBP_MSG_HEARTBEAT, &heartbeat_callback, NULL,
-                        &heartbeat_node);
-  sbp_register_callback(&s, SBP_MSG_BASELINE_NED, &baseline_callback, NULL,
-                        &baseline_node);
-  sbp_register_callback(&s, SBP_MSG_POS_LLH, &pos_llh_callback, NULL,
-                        &pos_llh_node);
-  sbp_register_callback(&s, SBP_MSG_VEL_NED, &vel_ned_callback, NULL,
-                        &vel_ned_node);
   sbp_register_callback(&s, SBP_MSG_GPS_TIME, &gps_time_callback, NULL,
-                        &gps_time_node);
+                        &gps_time_node); // 252
+  sbp_register_callback(&s, SBP_MSG_POS_LLH, &pos_llh_callback, NULL,
+                        &pos_llh_node); // 522
+  sbp_register_callback(&s, SBP_MSG_VEL_NED, &vel_ned_callback, NULL,
+                        &vel_ned_node); // 526
+  sbp_register_callback(&s, SBP_MSG_BASELINE_NED, &baseline_callback, NULL,
+                        &baseline_node); // 524
+  sbp_register_callback(&s, SBP_MSG_HEARTBEAT, &heartbeat_callback, NULL,
+                        &heartbeat_node); // 65535
 
+  fprintf(stdout, "\nWaiting for the first heartbeat...\n");
+  while (!flag_start) {
+    sbp_process(&s0, &piksi_port_read);
+  }
+  fprintf(stdout, "Starting the main loop...\n");
 
-
+  int ret = 0;
   while(1) {
-    gettimeofday(&start, NULL);
+    // gettimeofday(&start, NULL);
 
-    sbp_process(&s, &piksi_port_read);
-    fprintf(stdout, "relative position: %f, %f, %f\n", piksi.n / 1e3,
-            piksi.e / 1e3, piksi.d / 1e3);
+    ret = sbp_process(&s, &piksi_port_read);
 
-    gettimeofday(&stop, NULL);
-    // printf("took %f\n", (stop.tv_usec - start.tv_usec) / 1e3);
+    if (ret < 0)
+      printf("sbp_process error: %d\n", (int)ret);
+
+    // printf("%i\n", s.state);
+
+    // fprintf(stdout, "relative position: %f, %f, %f\n", piksi.n / 1e3,
+    //         piksi.e / 1e3, piksi.d / 1e3);
+    //
+    // gettimeofday(&stop, NULL);
+    // printf("loop time: %f\n", (stop.tv_usec - start.tv_usec) / 1e3);
     // usleep(100e3);
   }
 
