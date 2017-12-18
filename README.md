@@ -28,9 +28,9 @@
 
 ### Dependencies
 #### Serial Port Library - [lib-serial](https://sigrok.org/wiki/Libserialport)
-1. Clone the [repo](https://sigrok.org/wiki/Libserialport)
+1. Clone the [repo](git://sigrok.org/libserialport)
     ```
-    git clone https://sigrok.org/wiki/Libserialport
+    git clone git://sigrok.org/libserialport
     ```
 2. Build the library
     ```
