@@ -20,6 +20,10 @@ static sbp_msg_callbacks_node_t pos_llh_node;
 static sbp_msg_callbacks_node_t vel_ned_node;
 static sbp_msg_callbacks_node_t gps_time_node;
 
+struct piksi_msg {
+  int utc;
+};
+
 
 void usage(char *prog_name) {
   /* Help string for -h argument */
@@ -132,6 +136,9 @@ int main(int argc, char **argv)
   int result = 0;
 
   sbp_state_t s;
+  struct piksi_msg piksi;
+  piksi.utc = 100;
+  printf("%i", piksi.utc);
 
   // parse the args
   serial_port_name = "/dev/ttyUSB0";
@@ -193,7 +200,7 @@ int main(int argc, char **argv)
   sbp_register_callback(&s, SBP_MSG_GPS_TIME, &gps_time_callback, NULL,
                         &gps_time_node);
 
-  struct timeval stop, start;
+  // struct timeval stop, start;
 
   while(1) {
     // gettimeofday(&start, NULL);
