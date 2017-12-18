@@ -22,8 +22,18 @@ static sbp_msg_callbacks_node_t gps_time_node;
 
 struct piksi_msg {
   int utc;
+  double lat, lon, h;
+  s32 v_n, v_e, v_d;
+  u16 wn;
+  u32 tow;
+  s32 n, e, d;
+  u8 sats;
+  u8 flag;
 };
 
+struct timeval stop, start;
+
+struct piksi_msg piksi;
 
 void usage(char *prog_name) {
   /* Help string for -h argument */
@@ -38,33 +48,55 @@ void heartbeat_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
   fprintf(stdout, "%s\n", __FUNCTION__);
+  printf("took %f\n", (stop.tv_usec - start.tv_usec) / 1e3);
 }
 
 
 void baseline_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  fprintf(stdout, "%s\n", __FUNCTION__);
+  // fprintf(stdout, "%s\n", __FUNCTION__);
+
+  msg_baseline_ned_t baseline = *(msg_baseline_ned_t *)msg;
+  piksi.n = baseline.n;
+  piksi.e = baseline.e;
+  piksi.d = baseline.d;
+  piksi.flag = baseline.flags;
+  piksi.sats = baseline.n_sats;
 }
 
 
 void pos_llh_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  fprintf(stdout, "%s\n", __FUNCTION__);
+  // fprintf(stdout, "%s\n", __FUNCTION__);
+
+  msg_pos_llh_t pos_llh = *(msg_pos_llh_t *)msg;
+  piksi.lat = pos_llh.lat;
+  piksi.lon = pos_llh.lon;
+  piksi.h = pos_llh.height;
 }
 
 
 void vel_ned_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  fprintf(stdout, "%s\n", __FUNCTION__);
+  // fprintf(stdout, "%s\n", __FUNCTION__);
+
+  msg_vel_ned_t vel_ned = *(msg_vel_ned_t *)msg;
+  piksi.v_n = vel_ned.n;
+  piksi.v_e = vel_ned.e;
+  piksi.v_d = vel_ned.d;
 }
 
 void gps_time_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  fprintf(stdout, "%s\n", __FUNCTION__);
+  // fprintf(stdout, "%s\n", __FUNCTION__);
+
+  msg_gps_time_t gps_time = *(msg_gps_time_t *)msg;
+  piksi.wn = gps_time.wn;
+  piksi.tow = gps_time.tow;
 }
 
 
@@ -136,9 +168,9 @@ int main(int argc, char **argv)
   int result = 0;
 
   sbp_state_t s;
-  struct piksi_msg piksi;
+
   piksi.utc = 100;
-  printf("%i", piksi.utc);
+  printf("%i\n", piksi.utc);
 
   // parse the args
   serial_port_name = "/dev/ttyUSB0";
@@ -200,13 +232,18 @@ int main(int argc, char **argv)
   sbp_register_callback(&s, SBP_MSG_GPS_TIME, &gps_time_callback, NULL,
                         &gps_time_node);
 
-  // struct timeval stop, start;
+
 
   while(1) {
-    // gettimeofday(&start, NULL);
+    gettimeofday(&start, NULL);
+
     sbp_process(&s, &piksi_port_read);
-    // gettimeofday(&stop, NULL);
-    // printf("took %lu\n", stop.tv_usec - start.tv_usec);
+    fprintf(stdout, "relative position: %f, %f, %f\n", piksi.n / 1e3,
+            piksi.e / 1e3, piksi.d / 1e3);
+
+    gettimeofday(&stop, NULL);
+    // printf("took %f\n", (stop.tv_usec - start.tv_usec) / 1e3);
+    // usleep(100e3);
   }
 
   result = sp_close(piksi_port);
