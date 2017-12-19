@@ -67,8 +67,7 @@
     ```
 
 ## Troubleshooting
-* libserialport.so.0: cannot open shared object
-    configure dynamic linker run-time bindings
+1.  Error: "libserialport.so.0: cannot open shared object" - solution: configure dynamic linker run-time bindings
     ```
     sudo ldconfig /usr/local/lib
     ```
