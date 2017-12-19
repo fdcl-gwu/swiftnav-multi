@@ -11,7 +11,7 @@
     ```
 2. Install dependencies
     ```
-    sudo apt-get install build-essential pkg-config cmake doxygen check
+    sudo apt-get -y install build-essential pkg-config cmake doxygen check
     ```
 3. Create a build directory
     ```
@@ -32,8 +32,13 @@
     ```
     git clone git://sigrok.org/libserialport
     ```
-2. Build the library
+2. Install required packages
     ```
+    sudo apt-get -y install autoconf
+    sudo apt-get -y install libtool
+3. Build the library
+    ```
+    cd libserialport
     ./autogen.sh
     ./configure
     make
@@ -43,8 +48,8 @@
 #### On 64-bit Systems
 
   ```
-  sudo apt-get install libgtk2.0-0:i386 libidn11:i386 libglu1-mesa:i386
-  sudo apt-get install libpangox-1.0-0:i386 libpangoxft-1.0-0:i386
+  sudo apt-get -y install libgtk2.0-0:i386 libidn11:i386 libglu1-mesa:i386
+  sudo apt-get -y install libpangox-1.0-0:i386 libpangoxft-1.0-0:i386
   ```
 
 ### Running the code
