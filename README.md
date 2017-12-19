@@ -66,6 +66,13 @@
     ./read_rtk -p /dev/ttyUSB0
     ```
 
+## Troubleshooting
+* libserialport.so.0: cannot open shared object
+    configure dynamic linker run-time bindings
+    ```
+    sudo ldconfig /usr/local/lib
+    ```
+
 ## Python
 ### Environment setup
 1. Install Anaconda
