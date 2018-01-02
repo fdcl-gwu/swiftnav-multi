@@ -16,7 +16,8 @@ char *serial_port_name = NULL;
 struct sp_port *piksi_port = NULL;
 
 static sbp_msg_callbacks_node_t gps_time_node;
-static sbp_msg_callbacks_node_t pos_llh_node;
+// static sbp_msg_callbacks_node_t pos_llh_node;
+static sbp_msg_callbacks_node_t pos_llh_cov_node;
 static sbp_msg_callbacks_node_t vel_ned_node;
 static sbp_msg_callbacks_node_t baseline_node;
 static sbp_msg_callbacks_node_t heartbeat_node;
@@ -26,6 +27,7 @@ static sbp_msg_callbacks_node_t heartbeat_node_0;
 struct piksi_msg {
   int utc;
   double lat, lon, h;
+  float cov_n_n, cov_n_e, cov_n_d, cov_e_e, cov_e_d, cov_d_d;
   s32 v_n, v_e, v_d;
   u16 wn;
   u32 tow;
@@ -38,6 +40,7 @@ struct piksi_msg piksi;
 
 struct timeval stop, start;
 bool flag_start = 0;
+
 
 void usage(char *prog_name) {
   /* Help string for -h argument */
@@ -54,6 +57,7 @@ void heartbeat_callback_0(u16 sender_id, u8 len, u8 msg[], void *context)
   // fprintf(stdout, "First heartbeat detected.\n\n");
   flag_start = 1;
 }
+
 
 void heartbeat_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
@@ -76,9 +80,6 @@ void baseline_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 
   fprintf(stdout, "relative position: %f, %f, %f\n", piksi.n / 1e3,
     piksi.e / 1e3, piksi.d / 1e3);
-
-  // gettimeofday(&stop, NULL);
-  // printf("took %f\n", (stop.tv_usec - start.tv_usec) / 1e3);
 }
 
 
@@ -87,10 +88,28 @@ void pos_llh_callback(u16 sender_id, u8 len, u8 msg[], void *context)
   (void)sender_id, (void)len, (void)msg, (void)context;
   fprintf(stdout, "%s\n", __FUNCTION__);
 
-  msg_pos_llh_t pos_llh = *(msg_pos_llh_t *)msg;
+  msg_pos_llh_cov_t pos_llh = *(msg_pos_llh_cov_t *)msg;
   piksi.lat = pos_llh.lat;
   piksi.lon = pos_llh.lon;
   piksi.h = pos_llh.height;
+}
+
+
+void pos_llh_cov_callback(u16 sender_id, u8 len, u8 msg[], void *context)
+{
+  (void)sender_id, (void)len, (void)msg, (void)context;
+  fprintf(stdout, "%s\n", __FUNCTION__);
+
+  msg_pos_llh_cov_t pos_llh = *(msg_pos_llh_cov_t *)msg;
+  piksi.lat = pos_llh.lat;
+  piksi.lon = pos_llh.lon;
+  piksi.h = pos_llh.height;
+  piksi.cov_n_n = pos_llh.cov_n_n;
+  piksi.cov_n_e = pos_llh.cov_n_e;
+  piksi.cov_n_d = pos_llh.cov_n_d;
+  piksi.cov_e_e = pos_llh.cov_e_e;
+  piksi.cov_e_d = pos_llh.cov_e_d;
+  piksi.cov_d_d = pos_llh.cov_d_d;
 }
 
 
@@ -103,8 +122,8 @@ void vel_ned_callback(u16 sender_id, u8 len, u8 msg[], void *context)
   piksi.v_n = vel_ned.n;
   piksi.v_e = vel_ned.e;
   piksi.v_d = vel_ned.d;
-
 }
+
 
 void gps_time_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
@@ -243,8 +262,10 @@ int main(int argc, char **argv)
   sbp_state_init(&s);
   sbp_register_callback(&s, SBP_MSG_GPS_TIME, &gps_time_callback, NULL,
                         &gps_time_node); // 252
-  sbp_register_callback(&s, SBP_MSG_POS_LLH, &pos_llh_callback, NULL,
-                        &pos_llh_node); // 522
+  // sbp_register_callback(&s, SBP_MSG_POS_LLH, &pos_llh_callback, NULL,
+  //                       &pos_llh_node); // 522
+  sbp_register_callback(&s, SBP_MSG_POS_LLH_COV, &pos_llh_cov_callback, NULL,
+                        &pos_llh_cov_node); // 529
   sbp_register_callback(&s, SBP_MSG_VEL_NED, &vel_ned_callback, NULL,
                         &vel_ned_node); // 526
   sbp_register_callback(&s, SBP_MSG_BASELINE_NED, &baseline_callback, NULL,
