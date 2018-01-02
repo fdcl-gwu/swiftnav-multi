@@ -77,7 +77,7 @@ void baseline_callback(u16 sender_id, u8 len, u8 msg[], void *context)
   piksi.flag = baseline.flags;
   piksi.sats = baseline.n_sats;
 
-  fprintf(stdout, "%02i%02i%02i.%2.0f, %f, %f, %f, %f, %f, %f, %f, %f, %f,%i\n",
+  fprintf(stdout, "%02i%02i%02i.%02.0f, %f, %f, %f, %f, %f, %f, %f, %f, %f,%i\n",
     piksi.hr, piksi.min, piksi.sec, piksi.ns / 1e7,
     piksi.lat, piksi.lon, piksi.h,
     piksi.v_n / 1e3, piksi.v_e / 1e3, piksi.v_d / 1e3,
