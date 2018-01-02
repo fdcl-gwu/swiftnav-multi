@@ -51,7 +51,7 @@ void usage(char *prog_name) {
 void heartbeat_callback_0(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  fprintf(stdout, "First heartbeat detected.\n\n");
+  // fprintf(stdout, "First heartbeat detected.\n\n");
   flag_start = 1;
 }
 
@@ -94,7 +94,7 @@ void pos_llh_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 void vel_ned_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  fprintf(stdout, "%s\n", __FUNCTION__);
+  // fprintf(stdout, "%s\n", __FUNCTION__);
 
   msg_vel_ned_t vel_ned = *(msg_vel_ned_t *)msg;
   piksi.v_n = vel_ned.n;
@@ -106,8 +106,7 @@ void vel_ned_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 void gps_time_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  fprintf(stdout, "%s\n", __FUNCTION__);
-  // gettimeofday(&start, NULL);
+  // fprintf(stdout, "%s\n", __FUNCTION__);
 
   msg_gps_time_t gps_time = *(msg_gps_time_t *)msg;
   piksi.wn = gps_time.wn;
@@ -161,7 +160,6 @@ void setup_port(int baud)
     exit(EXIT_FAILURE);
   }
   printf("Configured the number of stop bits... done.\n");
-
 }
 
 
@@ -183,9 +181,6 @@ int main(int argc, char **argv)
 
   sbp_state_t s;
   sbp_state_t s0;
-
-  piksi.utc = 100;
-  printf("%i\n", piksi.utc);
 
   // parse the args
   serial_port_name = "/dev/ttyUSB0";
@@ -235,10 +230,13 @@ int main(int argc, char **argv)
   // set baud rate
   setup_port(baud);
 
+  // create a secondary sbp_state such that the first reading of the sbp
+  // messege sequence can be detected
   sbp_state_init(&s0);
   sbp_register_callback(&s0, SBP_MSG_HEARTBEAT, &heartbeat_callback_0, NULL,
                         &heartbeat_node_0); // 65535
 
+  // create the primary sbp_state and register all the required callbacks
   sbp_state_init(&s);
   sbp_register_callback(&s, SBP_MSG_GPS_TIME, &gps_time_callback, NULL,
                         &gps_time_node); // 252
@@ -251,26 +249,27 @@ int main(int argc, char **argv)
   sbp_register_callback(&s, SBP_MSG_HEARTBEAT, &heartbeat_callback, NULL,
                         &heartbeat_node); // 65535
 
+  // wait for the first heartbeat so that the beginning of the sbp messege can
+  // be identified
   fprintf(stdout, "\nWaiting for the first heartbeat...\n");
   while (!flag_start) {
     sbp_process(&s0, &piksi_port_read);
   }
   fprintf(stdout, "Starting the main loop...\n");
 
+  // start the reading process
   int ret = 0;
   while(1) {
-    // gettimeofday(&start, NULL);
 
+    // gettimeofday(&start, NULL);
     ret = sbp_process(&s, &piksi_port_read);
 
     if (ret < 0)
       printf("sbp_process error: %d\n", (int)ret);
 
-    // printf("%i\n", s.state);
+    fprintf(stdout, "relative position: %f, %f, %f\n", piksi.n / 1e3,
+      piksi.e / 1e3, piksi.d / 1e3);
 
-    // fprintf(stdout, "relative position: %f, %f, %f\n", piksi.n / 1e3,
-    //         piksi.e / 1e3, piksi.d / 1e3);
-    //
     // gettimeofday(&stop, NULL);
     // printf("loop time: %f\n", (stop.tv_usec - start.tv_usec) / 1e3);
     // usleep(100e3);
