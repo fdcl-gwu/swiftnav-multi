@@ -74,6 +74,9 @@ void baseline_callback(u16 sender_id, u8 len, u8 msg[], void *context)
   piksi.flag = baseline.flags;
   piksi.sats = baseline.n_sats;
 
+  fprintf(stdout, "relative position: %f, %f, %f\n", piksi.n / 1e3,
+    piksi.e / 1e3, piksi.d / 1e3);
+
   // gettimeofday(&stop, NULL);
   // printf("took %f\n", (stop.tv_usec - start.tv_usec) / 1e3);
 }
@@ -94,7 +97,7 @@ void pos_llh_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 void vel_ned_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  // fprintf(stdout, "%s\n", __FUNCTION__);
+  fprintf(stdout, "%s\n", __FUNCTION__);
 
   msg_vel_ned_t vel_ned = *(msg_vel_ned_t *)msg;
   piksi.v_n = vel_ned.n;
@@ -106,7 +109,7 @@ void vel_ned_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 void gps_time_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  // fprintf(stdout, "%s\n", __FUNCTION__);
+  fprintf(stdout, "%s\n", __FUNCTION__);
 
   msg_gps_time_t gps_time = *(msg_gps_time_t *)msg;
   piksi.wn = gps_time.wn;
@@ -266,9 +269,6 @@ int main(int argc, char **argv)
 
     if (ret < 0)
       printf("sbp_process error: %d\n", (int)ret);
-
-    fprintf(stdout, "relative position: %f, %f, %f\n", piksi.n / 1e3,
-      piksi.e / 1e3, piksi.d / 1e3);
 
     // gettimeofday(&stop, NULL);
     // printf("loop time: %f\n", (stop.tv_usec - start.tv_usec) / 1e3);
