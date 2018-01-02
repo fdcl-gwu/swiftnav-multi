@@ -25,13 +25,12 @@ static sbp_msg_callbacks_node_t heartbeat_node;
 static sbp_msg_callbacks_node_t heartbeat_node_0;
 
 struct piksi_msg {
-  int utc;
   double lat, lon, h;
   float cov_n_n, cov_n_e, cov_n_d, cov_e_e, cov_e_d, cov_d_d;
-  s32 v_n, v_e, v_d;
-  u16 wn;
-  u32 tow;
-  s32 n, e, d;
+  s32 v_n, v_e, v_d; // (mm/s)
+  u8 hr, min, sec;
+  u32 ns;
+  s32 n, e, d; // (m/s)
   u8 sats;
   u8 flag;
 };
@@ -78,9 +77,12 @@ void baseline_callback(u16 sender_id, u8 len, u8 msg[], void *context)
   piksi.flag = baseline.flags;
   piksi.sats = baseline.n_sats;
 
-  fprintf(stdout, "%i, %f, %f, %f, %f, %f, %f\n", piksi.utc, piksi.lat,
-    piksi.lon, piksi.h, piksi.n / 1e3,
-    piksi.e / 1e3, piksi.d / 1e3);
+  fprintf(stdout, "%02i%02i%02i.%2.0f, %f, %f, %f, %f, %f, %f, %f, %f, %f,%i\n",
+    piksi.hr, piksi.min, piksi.sec, piksi.ns / 1e7,
+    piksi.lat, piksi.lon, piksi.h,
+    piksi.v_n / 1e3, piksi.v_e / 1e3, piksi.v_d / 1e3,
+    piksi.n / 1e3, piksi.e / 1e3, piksi.d / 1e3,
+    piksi.flag);
 }
 
 
@@ -131,9 +133,11 @@ void gps_time_callback(u16 sender_id, u8 len, u8 msg[], void *context)
   (void)sender_id, (void)len, (void)msg, (void)context;
   // fprintf(stdout, "%s\n", __FUNCTION__);
 
-  msg_gps_time_t gps_time = *(msg_gps_time_t *)msg;
-  piksi.wn = gps_time.wn;
-  piksi.tow = gps_time.tow;
+  msg_utc_time_t gps_time = *(msg_utc_time_t *)msg;
+  piksi.hr = gps_time.hours;
+  piksi.min = gps_time.minutes;
+  piksi.sec = gps_time.seconds;
+  piksi.ns = gps_time.ns;
 }
 
 
@@ -261,7 +265,7 @@ int main(int argc, char **argv)
 
   // create the primary sbp_state and register all the required callbacks
   sbp_state_init(&s);
-  sbp_register_callback(&s, SBP_MSG_GPS_TIME, &gps_time_callback, NULL,
+  sbp_register_callback(&s, SBP_MSG_UTC_TIME, &gps_time_callback, NULL,
                         &gps_time_node); // 252
   sbp_register_callback(&s, SBP_MSG_POS_LLH, &pos_llh_callback, NULL,
                         &pos_llh_node); // 522
