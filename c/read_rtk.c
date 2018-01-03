@@ -212,7 +212,7 @@ int main(int argc, char **argv)
   // parse the args
   serial_port_name = "/dev/ttyUSB0";
   unsigned int baud = 115200;
-  while ((opt = getopt(argc, argv, "pb:h")) != -1) {
+  while ((opt = getopt(argc, argv, "p:b:h")) != -1) {
     switch (opt) {
       case 'p':
         serial_port_name = (char *)calloc(strlen(optarg) + 1, sizeof(char));
