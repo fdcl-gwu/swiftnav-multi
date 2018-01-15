@@ -25,13 +25,30 @@ static sbp_msg_callbacks_node_t heartbeat_node;
 static sbp_msg_callbacks_node_t heartbeat_node_0;
 
 struct piksi_msg {
-  double lat, lon, h;
-  float cov_n_n, cov_n_e, cov_n_d, cov_e_e, cov_e_d, cov_d_d;
-  s32 v_n, v_e, v_d; // (mm/s)
-  u8 hr, min, sec;
+  // GPS solution data
+  double lat, lon, h; //latitude [deg], longitude [deg], altitude [m]
+  float cov_n_n, cov_n_e, cov_n_d, cov_e_e, cov_e_d, cov_d_d; // error covariances
+  float h_accuracy;    // horizontal position estimated standard deviation [mm]
+  float v_accuracy;    // vertical position estimated standard deviation [mm]
+
+  // RTK data
+  s32 n, e, d; // baseline North, East, Down coordinates [mm]
+  s32 v_n, v_e, v_d; // baseline North, East, Down velocities [mm/s]
+
+  // GPS time
+  u8 hr, min, sec; //
   u32 ns;
-  s32 n, e, d; // (m/s)
-  u8 sats;
+
+  // GPS solution data
+  u8 sats; // number of satellites in the vicinity
+
+  // RTK status flag
+  // 0 Invalid
+  // 1 Single Point Position (SPP)
+  // 2 Differential GNSS (DGNSS)
+  // 3 Float RTK
+  // 4 Fixed RTK
+  // 5 Dead Reckoning
   u8 flag;
 };
 
@@ -95,6 +112,9 @@ void pos_llh_callback(u16 sender_id, u8 len, u8 msg[], void *context)
   piksi.lat = pos_llh.lat;
   piksi.lon = pos_llh.lon;
   piksi.h = pos_llh.height;
+
+  piksi.h_accuracy = pos_llh.h_accuracy;
+  piksi.v_accuracy = pos_llh.v_accuracy;
 }
 
 
