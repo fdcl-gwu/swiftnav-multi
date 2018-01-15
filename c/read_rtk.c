@@ -91,7 +91,7 @@ void pos_llh_callback(u16 sender_id, u8 len, u8 msg[], void *context)
   (void)sender_id, (void)len, (void)msg, (void)context;
   // fprintf(stdout, "%s\n", __FUNCTION__);
 
-  msg_pos_llh_cov_t pos_llh = *(msg_pos_llh_cov_t *)msg;
+  msg_pos_llh_t pos_llh = *(msg_pos_llh_t *)msg;
   piksi.lat = pos_llh.lat;
   piksi.lon = pos_llh.lon;
   piksi.h = pos_llh.height;
