@@ -3,7 +3,7 @@ from sbp.client import Handler, Framer
 from sbp.navigation import SBP_MSG_BASELINE_NED, SBP_MSG_POS_LLH, \
     SBP_MSG_VEL_NED, SBP_MSG_GPS_TIME
 from sbp.msg import SBP
-from sbp.settings import SBP_MSG_SETTINGS_WRITE
+from sbp.settings import SBP_MSG_SETTINGS_WRITE, SBP_MSG_SETTINGS_SAVE
 
 
 import argparse
@@ -29,6 +29,10 @@ def enable_simulator_mode(port='/dev/ttyUSB0', baud=115200):
         sbp_msg.payload = 'simulator\0enabled\0True\0'
         sbp_msg = sbp_msg.pack()
         driver.write(sbp_msg)
+
+        sbp_save = SBP(SBP_MSG_SETTINGS_SAVE)
+        sbp_save = sbp_save.pack()
+        driver.write(sbp_save)
 
 
 if __name__ == "__main__":
