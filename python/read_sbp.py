@@ -1,10 +1,11 @@
+from datetime import datetime
+
 from sbp.client.drivers.pyserial_driver import PySerialDriver
 from sbp.client import Handler, Framer
 from sbp.navigation import SBP_MSG_BASELINE_NED, SBP_MSG_POS_LLH, \
     SBP_MSG_VEL_NED, SBP_MSG_GPS_TIME
 from sbp.msg import SBP
 from sbp.settings import SBP_MSG_SETTINGS_WRITE
-
 
 import argparse
 
@@ -60,7 +61,7 @@ def read_rtk(port='/dev/ttyUSB0', baud=115200):
     out_file = 'GPS_' + t_now + '.txt'
 
     # open a connection to Piksi
-    with open(out_file, 'w', encoding='utf-8') as f:
+    with open(out_file, 'w') as f:
         with PySerialDriver(port, baud) as driver:
             with Handler(Framer(driver.read, None, verbose=True)) as source:
                 try:
