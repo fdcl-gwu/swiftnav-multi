@@ -2,6 +2,8 @@ from sbp.client.drivers.pyserial_driver import PySerialDriver
 from sbp.client import Handler, Framer
 from sbp.navigation import SBP_MSG_BASELINE_NED, SBP_MSG_POS_LLH, \
     SBP_MSG_VEL_NED, SBP_MSG_GPS_TIME
+from sbp.piksi import SBP_MSG_RESET
+from sbp.msg import SBP
 
 import argparse
 import pdb
@@ -52,6 +54,7 @@ def read_rtk(port='/dev/ttyUSB0', baud=115200):
     '''
 
     m = RtkMessage()
+    print('Reading from {} at {}'.format(port, baud))
 
     # open a connection to Piksi
     with PySerialDriver(port, baud) as driver:
@@ -96,6 +99,32 @@ def read_rtk(port='/dev/ttyUSB0', baud=115200):
     return
 
 
+def set_simulator_mode(port='/dev/ttyUSB0', baud=115200):
+    '''
+    Set simulator mode on on the Multi
+
+    Args:
+        port: serial port [[default='/dev/ttyUSB0']
+        baud: baud rate [default=115200]
+
+    Returns:
+        None
+    '''
+
+    print('Reading from {} at {}'.format(port, baud))
+    print('Setting the simulator mode on ...')
+
+    # open a connection to Piksi
+    with PySerialDriver(port, baud) as driver:
+        # with Handler(Framer(driver.read, driver.write, verbose=True)) as source:
+        reset_sbp = SBP(SBP_MSG_RESET)
+        reset_sbp.payload = ''
+        reset_sbp = reset_sbp.pack()
+        driver.write(reset_sbp)
+
+        # pass
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description=(
@@ -113,4 +142,5 @@ if __name__ == "__main__":
         help='specify the baud rate [default = 115200]')
     args = parser.parse_args()
 
-    read_rtk(args.port[0], args.baud[0])
+    # read_rtk(args.port[0], args.baud[0])
+    set_simulator_mode(args.port[0], args.baud[0])
