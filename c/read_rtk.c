@@ -78,7 +78,7 @@ void heartbeat_callback_0(u16 sender_id, u8 len, u8 msg[], void *context)
 void heartbeat_callback(u16 sender_id, u8 len, u8 msg[], void *context)
 {
   (void)sender_id, (void)len, (void)msg, (void)context;
-  // fprintf(stdout, "%s\n", __FUNCTION__);
+  fprintf(stdout, "%s\n", __FUNCTION__);
 }
 
 
