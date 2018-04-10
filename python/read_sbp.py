@@ -88,7 +88,7 @@ def read_rtk(port='/dev/ttyUSB0', baud=115200):
                     else:
                         pass
 
-                    print m.whole_string()
+                    print(m.whole_string())
 
             except KeyboardInterrupt:
                 pass
