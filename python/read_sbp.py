@@ -2,9 +2,11 @@ from sbp.client.drivers.pyserial_driver import PySerialDriver
 from sbp.client import Handler, Framer
 from sbp.navigation import SBP_MSG_BASELINE_NED, SBP_MSG_POS_LLH, \
     SBP_MSG_VEL_NED, SBP_MSG_GPS_TIME
+from sbp.msg import SBP
+from sbp.settings import SBP_MSG_SETTINGS_WRITE
+
 
 import argparse
-import pdb
 
 
 class RtkMessage:
@@ -50,6 +52,8 @@ def read_rtk(port='/dev/ttyUSB0', baud=115200):
     Returns:
         None
     '''
+
+    print('Reading from {} at {}'.format(port, baud))
 
     m = RtkMessage()
     t_now = datetime.now().strftime('%Y%m%d%H%M%S')
