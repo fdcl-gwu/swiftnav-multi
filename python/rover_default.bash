@@ -1,5 +1,7 @@
 #!/bin/bash
 
-echo "\nSetting rover GPS to default settings ...\n"
-python2 write_from_ini_file.py -f settings_files/rover_default.ini
-echo "\nTask finished."
+echo " "
+echo "Setting rover GPS to default settings ..."
+python2 write_from_ini_file.py -p /dev/ttyS0 -f settings_files/rover_default.ini
+echo " "
+echo "Task finished."
