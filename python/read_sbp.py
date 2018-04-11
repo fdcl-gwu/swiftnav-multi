@@ -57,51 +57,51 @@ def read_rtk(port='/dev/ttyUSB0', baud=115200):
     print('Reading from {} at {}'.format(port, baud))
 
     m = RtkMessage()
-    t_now = datetime.now().strftime('%Y%m%d%H%M%S')
-    out_file = 'GPS_' + t_now + '.txt'
+    # t_now = datetime.now().strftime('%Y%m%d%H%M%S')
+    # out_file = 'GPS_' + t_now + '.txt'
 
     # open a connection to Piksi
-    with open(out_file, 'w') as f:
-        with PySerialDriver(port, baud) as driver:
-            with Handler(Framer(driver.read, None, verbose=True)) as source:
-                try:
-                    msg_list = [SBP_MSG_BASELINE_NED, SBP_MSG_POS_LLH,
-                                SBP_MSG_VEL_NED, SBP_MSG_GPS_TIME]
-                    for msg, metadata in source.filter(msg_list):
+    # with open(out_file, 'w') as f:
+    with PySerialDriver(port, baud) as driver:
+        with Handler(Framer(driver.read, None, verbose=True)) as source:
+            try:
+                msg_list = [SBP_MSG_BASELINE_NED, SBP_MSG_POS_LLH,
+                            SBP_MSG_VEL_NED, SBP_MSG_GPS_TIME]
+                for msg, metadata in source.filter(msg_list):
 
-                        # LLH position in deg-deg-m
-                        if msg.msg_type == 522:
-                            m.lat = msg.lat
-                            m.lon = msg.lon
-                            m.h = msg.height
+                    # LLH position in deg-deg-m
+                    if msg.msg_type == 522:
+                        m.lat = msg.lat
+                        m.lon = msg.lon
+                        m.h = msg.height
 
-                        # RTK position in mm (from base to rover)
-                        elif msg.msg_type == 524:
-                            m.n = msg.n
-                            m.e = msg.e
-                            m.d = msg.d
-                            m.flag = msg.flags
+                    # RTK position in mm (from base to rover)
+                    elif msg.msg_type == 524:
+                        m.n = msg.n
+                        m.e = msg.e
+                        m.d = msg.d
+                        m.flag = msg.flags
 
-                        # RTK velocity in mm/s
-                        elif msg.msg_type == 526:
-                            m.v_n = msg.n
-                            m.v_e = msg.e
-                            m.v_d = msg.d
+                    # RTK velocity in mm/s
+                    elif msg.msg_type == 526:
+                        m.v_n = msg.n
+                        m.v_e = msg.e
+                        m.v_d = msg.d
 
-                        # GPS time
-                        elif msg.msg_type == 258:
-                            m.wn = msg.wn
-                            m.tow = msg.tow  # in millis
+                    # GPS time
+                    elif msg.msg_type == 258:
+                        m.wn = msg.wn
+                        m.tow = msg.tow  # in millis
 
-                        else:
-                            pass
+                    else:
+                        pass
 
-                        print(m.whole_string())
-                        f.write(line)
-                        f.write('\n')
+                    print(m.whole_string())
+                    # f.write(line)
+                    # f.write('\n')
 
-                except KeyboardInterrupt:
-                    pass
+            except KeyboardInterrupt:
+                pass
 
     return
 
