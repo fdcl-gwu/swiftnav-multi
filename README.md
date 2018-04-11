@@ -1,10 +1,14 @@
 # swiftnav-multi
 This repository includes Python and C code for reading multiple messages from Swift-Nav Piksi Multi. All the codes are tested in Linux environments and instructions are for Linux only.
 
-## Setting-up Piski
-For debugging purposes, Piksi can be configured to work in simulation mode so that you do not have to go outside with a GPS antenna for testing your codes.
+The provided codes can perform following tasks
+* read multiple messages from the Multi (C/Python)
+* read and write settings without the console (Python)
 
-With Piksi Multi connected to your computer and Swift Console running:
+## Setting-up Multi
+For debugging purposes, Multi can be configured to work in simulation mode so that you do not have to go outside with a GPS antenna for testing your codes.
+
+With Multi connected to your computer and Swift Console running:
 * Click the *Settings* tab
 * In the *Simulator* section, you will see a value for *enabled*. Click on this.
 * Set the value of *enabled* to *True* by selecting True from the drop-down menu right part of the tab.
@@ -19,13 +23,7 @@ This code only processes LLH position, velocity, baseline solution, and UTC. For
 SBP library has issues with working with Python 3 as of writing of this code. So it is necessary to use Python 2. Below instructions assume that [conda](https://www.anaconda.com/download/) has already been installed.
 
 ### Environment setup
-1. Install Anaconda
-2. Create and source the environment. If the environment is already created, just source it.
-    ```
-    conda create -n fly_out python=2
-    source activate fly_out
-    ```
-3. Install required libraries
+Install required libraries
     ```
     pip install sbp
     ```
@@ -33,7 +31,7 @@ SBP library has issues with working with Python 3 as of writing of this code. So
 ### Running the Code
 Simply run the py file: (default port = \dev\ttyUSB0, default baud rate = 115200)
 ```
-python read_sbp.py
+python2 read_sbp.py
 ```
 
 For different ports or baud rates:
@@ -43,9 +41,9 @@ python read_sbp.py -p /path/to/port -b baud_rate
 
 ## C-Code
 ### Dependencies
-Piksi sends messages using a custom protocol called Swaiftnav Binary Protocol (SBP). Running this C-code needs the installation of few dependencies.
-* sbp-lip : for parsing the SBP messages
-* lib-serial : for communicating with Piksi through the serial port
+Multi sends messages using a custom protocol called Swaiftnav Binary Protocol (SBP). Running this C-code needs the installation of few dependencies.
+* sbp-lib : for parsing the SBP messages
+* lib-serial : for communicating with Multi through the serial port
 
 #### SBP Library - [sbp-lib](https://github.com/swift-nav/libsbp.git)
 1. Clone the official [sbp library](https://github.com/swift-nav/libsbp.git)
