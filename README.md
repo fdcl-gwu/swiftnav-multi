@@ -29,7 +29,7 @@ Install required libraries
     ```
 
 ### Running the Code
-Simply run the py file: (default port = \dev\ttyUSB0, default baud rate = 115200)
+Simply run the py file (default port = \dev\ttyUSB0, default baud rate = 115200). For issues, see troubleshooting.
 ```
 python2 read_sbp.py
 ```
@@ -38,6 +38,27 @@ For different ports or baud rates:
 ```
 python read_sbp.py -p /path/to/port -b baud_rate
 ```
+
+### Changing the Settings without the Console
+1. To rest:
+  ```
+  python2 reset_multi.py -p /path/to/port -b baud_rate
+  ```
+2. To write settings to Multi from an ini file
+  ```
+  python2 write_from_ini_file.py -f /path/to/ini/file
+  ```
+  There are few ini files saved in settings_files directory. These files are
+  first saved through the SwiftNav Console. Usually those files are tied to
+  serial number of the GPS. So you need different files for different GPS units.
+3. Running the code through bash files
+  There are few bash files added so that you do not need to manually type all
+  the arguments.
+  ```
+  sudo chmod +x name/of/the/bashfile
+  ./name/of/the/bashfile
+  ```
+
 
 ## C-Code
 ### Dependencies
@@ -115,4 +136,10 @@ On 64-bit systems, you might need to install below packages.
 2. Cannot open the serial port (replace /path/to/ports with your actual port, eg:  sudo chmod 777 /dev/ttyUSB0)
     ```
     sudo chmod 777 /path/to/port
+    ```
+3. Error: AttributeError: 'module' object has no attribute 'Struct' - solution
+   python SBP libraries need specific versions of "construct" and "requests-futures" libraries.
+    ```
+    sudo pip install construct==2.9.33
+    sudo pip install requests-futures==0.9.5
     ```
