@@ -2,8 +2,8 @@
 This repository includes Python and C code for reading multiple messages from Swift-Nav Piksi Multi. All the codes are tested in Linux environments and instructions are for Linux only.
 
 The provided codes can perform following tasks
-* read multiple messages from the Multi (C/Python)
-* read and write settings without the console (Python)
+* read multiple messages from the Multi ([C](#c-code)/[Python](#python-code)
+* read and write settings without the console ([Python](#changing-the-settings-without-the-console)
 
 ## Setting-up Multi
 For debugging purposes, Multi can be configured to work in simulation mode so that you do not have to go outside with a GPS antenna for testing your codes.
