@@ -1,32 +1,32 @@
 # swiftnav-multi
 This repository includes Python and C code for reading multiple messages from Swift-Nav Piksi Multi. All the codes are tested in Linux environments and instructions are for Linux only.
 
-The provided codes can perform following tasks
-* read multiple messages from the Multi ([C](#c-code)/[Python](#python-code))
-* read and write settings without the console ([Python](#changing-the-settings-without-the-console))
+The provided codes can perform the following tasks:
+* read multiple messages from the Piksi Multi ([C](#c-code)/[Python](#python-code))
+* read and write settings through command line (without the console) ([Python](#changing-the-settings-without-the-console))
 
 ## Setting-up Multi
 For debugging purposes, Multi can be configured to work in simulation mode so that you do not have to go outside with a GPS antenna for testing your codes.
 
 With Multi connected to your computer and Swift Console running:
-* Click the *Settings* tab
-* In the *Simulator* section, you will see a value for *enabled*. Click on this.
-* Set the value of *enabled* to *True* by selecting True from the drop-down menu right part of the tab.
-* Then click *Save to Flash*
+* Click the `Settings` tab
+* In the `Simulator` section, you will see a value for `enabled`. Click on this.
+* Set the value of `enabled` to `True` by selecting True from the drop-down menu right part of the tab.
+* Then click `Save to Flash` button.
 
 The official documentation can be found [here](https://support.swiftnav.com/customer/en/portal/articles/2757369-piksi-multi---using-simulation-mode).
 
 ## Modifying the code
-This code only processes LLH position, velocity, baseline solution, and UTC. For other messages, refer the [SPB Manual](https://support.swiftnav.com/customer/en/portal/articles/2492810-swift-binary-protocol) for additional messages. For finding the elements in a message, check relevant h file in c/include/libsbp of [sbp library](https://github.com/swift-nav/libsbp.git). For example, *SBP_MSG_POS_LLH* is in *navigation.h*.
+This code only processes few messages like LLH position, velocity, baseline solution, and UTC. Please refer the [SPB Manual](https://support.swiftnav.com/customer/en/portal/articles/2492810-swift-binary-protocol) for additional messages. For finding the elements in a message, check relevant h file in `/c/include/libsbp` of [sbp library](https://github.com/swift-nav/libsbp.git). For example, `SBP_MSG_POS_LLH` is in `navigation.h`.
 
 ## Python Code
 SBP library has issues with working with Python 3 as of writing of this code. So it is necessary to use Python 2. Below instructions assume that [conda](https://www.anaconda.com/download/) has already been installed.
 
 ### Environment setup
 Install required libraries
-    ```
-    pip install sbp
-    ```
+```
+pip install sbp
+```
 
 ### Running the Code
 Simply run the py file (default port = \dev\ttyUSB0, default baud rate = 115200). For issues, see troubleshooting.
