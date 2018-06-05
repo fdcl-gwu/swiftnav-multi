@@ -36,7 +36,7 @@ class RtkMessage:
                 self.d, self.v_n, self.v_e, self.v_d, self.flag))
 
 
-def read_rtk(port='/dev/ttyUSB0', baud=115200):
+def read_rtk(port='/dev/ttyS0', baud=115200):
     '''
     Reads the RTK output from SwiftNav Piksi, parses the messege and prints.
     Piksi's must be configured to give RTK message through the serial port.

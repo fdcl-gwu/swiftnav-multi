@@ -230,7 +230,7 @@ int main(int argc, char **argv)
   sbp_state_t s0;
 
   // parse the args
-  serial_port_name = "/dev/ttyUSB0";
+  serial_port_name = "/dev/ttyS0";
   unsigned int baud = 115200;
   while ((opt = getopt(argc, argv, "p:b:h")) != -1) {
     switch (opt) {
